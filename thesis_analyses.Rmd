@@ -1,0 +1,436 @@
+---
+title: "Content Validation and Internal Validation for Thesis"
+author: "Frederico Pedrosa"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    toc: true
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    code_folding: hide
+---
+
+
+This document presents the analysis of judge ratings collected during the content validation phase of a thesis project, followed by an examination of its internal structure. The scale examined is called "Assessment Scale for Group Music Therapy in Substance Use Disorders (MTDQ)." 
+
+##**Content validity**
+
+**Load Libraries an preparing data**
+
+```{r}
+library(readxl)
+library(psych)
+
+# -----------------------------------------
+file_path <- "~/Doutorado/content_validity.xlsx"
+# -----------------------------------------
+
+raw_data <- read_excel(file_path)
+
+# Remove the first two columns and convert to data frame
+df_original <- as.data.frame(raw_data[, -c(1,2)])
+
+# Define custom column names in English
+custom_colnames <- c("profession", "city", "gender", "degree", 
+                     "1", "2", "2.1", "2.2", "3", "3.1", "3.2",
+                     "4", "4.1", "4.2", "5", "5.1", "5.2",
+                     "6", "6.1", "6.2", "7", "7.1", "7.2",
+                     "8", "8.1", "8.2", "9", "9.1", "9.2",
+                     "10", "10.1", "10.2", "11", "11.1", "11.2",
+                     "12", "13", "14", "15", "16", "17", "18",
+                     "19", "20", "21", "22")
+
+
+# Assign names, making them syntactically valid 
+df_named <- setNames(df_original, make.names(custom_colnames))
+
+# Display first few rows and column names to verify
+print(colnames(df_named))
+
+```
+
+```{r}
+# Subset X: Items 2.1 to 11.2 
+subset_X_indices <- c(7,8,10,11,13,14,16,17,19,20,22,23,25,26,28,29,31,32,34,35)
+subset_X <- df_named[, subset_X_indices]
+print(colnames(subset_X))
+
+
+# Subset Y: Items 1 to 11.2, plus 14 to 20 
+subset_Y_indices <- c(6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 39, 40, 41, 42, 43, 44, 45)
+subset_Y <- df_named[, subset_Y_indices]
+print(colnames(subset_Y))
+
+# Subset Z: Items related to Q12/Q13
+subset_Z_indices <- c(37, 38, 39, 40, 41, 42, 43, 44, 45)
+subset_Z <- df_named[, subset_Z_indices]
+print(colnames(subset_Z))
+```
+**Analysis of objective Items**
+
+This section analyzes the quantitative ratings provided by the judges for the items included in Subset Y (Items 1-11.2, 14-20). We calculate the mean rating for each item and visualize them using a bar plot. A reference line is added at 0.8, which  represent a target agreement threshold.
+
+```{r}
+# Converting columns that might be character/factor due to Excel import issues
+subset_Y_numeric <- data.frame(lapply(subset_Y, function(x) {
+  if(is.character(x) || is.factor(x)) {
+    # Attempt conversion, return NA on failure
+    suppressWarnings(as.numeric(as.character(x)))
+  } else {
+    as.numeric(x) # Ensure it's numeric even if already integer
+  }
+}))
+
+
+# Calculate descriptive statistics 
+desc_stats_Y <- describe(subset_Y_numeric)
+
+# Define labels for the bar plot 
+item_labels_y <- colnames(subset_Y) # Use actual column names from the subset
+
+# Create the bar plot
+par(cex.lab = 1.2, cex.axis = 1.0, mar = c(6, 4, 2, 2) + 0.1) # Adjust margins if labels overlap
+barplot(desc_stats_Y$mean,
+        width = 1, space = 0.7,
+        names.arg = item_labels_y,
+        main = "Mean Judge Ratings per Item ", # Added title
+        xlab = "Item",
+        ylab = "Mean Rating", # Changed label to reflect the metric
+        col = "light grey",
+        las = 2) 
+
+agreement_threshold = 0.8
+abline(h = agreement_threshold, col = "red", lwd = 2)
+
+```
+**Analysis of Comprehensibility Items (Q12 & Q13)**
+
+Items 12 and 13 assessed the comprehensibility of specific sections or instructions and used categorical responses. These were handled separately.
+
+
+```{r}
+# Responses 
+responses_q12_q13 <- data.frame(
+  Q12 = factor(c("Fully comprehensible", "Partially comprehensible", "Partially comprehensible",
+                 "Fully comprehensible", "Fully comprehensible", "Partially comprehensible",
+                 "Fully comprehensible", "Partially comprehensible", "Fully comprehensible",
+                 "Partially comprehensible"), levels = c("Fully comprehensible", "Partially comprehensible")), # Define factor levels for consistent tables
+  Q13 = factor(c("Fully comprehensible", "Partially comprehensible", "Fully comprehensible",
+                 "Partially comprehensible", "Fully comprehensible", "Partially comprehensible",
+                 "Fully comprehensible", "Fully comprehensible", "Fully comprehensible",
+                 "Fully comprehensible"), levels = c("Fully comprehensible", "Partially comprehensible"))
+)
+
+# Create frequency tables
+freq_q12 <- table(responses_q12_q13$Q12)
+freq_q13 <- table(responses_q12_q13$Q13)
+
+# Create a data frame for plotting
+# Handle cases where a category might have zero counts by accessing table elements by name
+plot_data_q12_q13 <- data.frame(
+  Question = c("Q12", "Q13"),
+  `Fully comprehensible` = c(freq_q12["Fully comprehensible"], freq_q13["Fully comprehensible"]),
+  `Partially comprehensible` = c(freq_q12["Partially comprehensible"], freq_q13["Partially comprehensible"]),
+  check.names = FALSE # Prevent R from changing column names with spaces
+)
+# Replace NAs (if a category was missing) with 0
+plot_data_q12_q13[is.na(plot_data_q12_q13)] <- 0
+
+
+# Create the grouped bar plot
+barplot(height = t(as.matrix(plot_data_q12_q13[, -1])), 
+        beside = TRUE,
+        col = c("black", "light grey"), 
+        names.arg = plot_data_q12_q13$Question,
+        main = "", # Added title
+        xlab = "Question",
+        ylab = "Number of Responses",
+        legend.text = colnames(plot_data_q12_q13[, -1]), # Use translated colnames
+        args.legend = list(x = "topleft", inset = c(0, -0.15), cex = 0.8),
+        xpd = TRUE
+        )
+
+```
+##**Internal Structure Validity**
+
+
+
+```{r}
+library(readxl)
+library(readxl)
+library(dplyr)
+library(psych)
+library(MVN)
+library(semTools)
+library(lavaan)
+library(semPlot)
+
+# --- Ensure this path is correct ---
+data <- read_excel("~/Doutorado/dados.xlsx")
+names(data) <- c("id", paste0("i", c(1:20)) , "age", "sex")
+# -----------------------------------
+
+```
+
+Sociodemographics
+
+```{r}
+nrow(data) 
+# Sample consists of 202 participants
+
+##Age
+describe(data$age) 
+# Average = 44.7, SD = 12.7, min = 18 e max = 69. Obs: 12 missings 
+
+# Sex 
+describe(data$sex) # 77% male participants 
+```
+
+**Multivariate Normality Analysis** 
+
+```{r}
+mvn_results <- mvn(data[, 2:21], mvnTest = "mardia")
+print(mvn_results$multivariateNormality)
+# Skewness: 2487.78, p < 0.001 
+# Kurtosis: 10.76, p < 0.001 
+# Data do not show multivariate normal distribution
+# Use WLSMV estimator for CFA
+
+```
+
+#### **Confirmatory Factor Analysis (CFA)** 
+
+**Unidimensional Model (General Factor)**
+
+```{r} 
+# Define the unidimensional model
+model_uni <- '
+general =~ i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9 + i10 +
+i11 + i12 + i13 + i14 + i15 + i16 + i17 + i18 + i19 + i20
+'
+# Fit the model using WLSMV estimator for ordered data
+fit_model_uni <- cfa(model_uni, data = data, ordered = TRUE,
+                     estimator = "WLSMV", std.lv=TRUE)
+
+# Get fit measures 
+fitMeasures(fit_model_uni, fit.measures = c("chisq","df","cfi", "rmsea",
+                                           "rmsea.ci.lower", "rmsea.ci.upper"))
+# chisq(df=170) = 170.000, CFI = 0.968, RMSEA = 0.073 [0.058, 0.087]
+# Model was not rejected 
+
+# Get summary with standardized loadings
+summary(fit_model_uni, fit.measures = TRUE, standardized = TRUE)
+
+# Descriptive statistics of factor loadings:
+loadings_model_uni <- standardizedsolution(fit_model_uni, type = "std.all")
+# Selecting based on row indices
+print(round(loadings_model_uni[1:20, ] %>% select(est.std) %>% 
+        summarise(mean = mean(abs(est.std)), sd = sd(abs(est.std)),
+                  min = min(abs(est.std)), max = max(abs(est.std))), 2))
+# Mean = 0.51, SD = 0.18, min = 0.02 and max = 0.72
+
+
+# Reliability
+print(round(reliability(fit_model_uni), 2))
+source("comp_reliability.R")
+comp_reliability(fit_model_uni) 
+# General: alpha = 0.85, alpha ord. = 0.89, omega McDonald = 0.86, comp. reliability = 0.74 
+
+# Plot the model
+semPaths(fit_model_uni,"std",layout="circle",residuals=FALSE,sizeLat=14,sizeLat2=14,edge.color="black",edge.label.cex=1.4,
+         mar=c(2.0, 2.0, 2.0, 2.0),esize=7,curvePivot = FALSE, intercepts=FALSE,thresholds = FALSE,
+         nCharNodes=0,sizeMan=8, edge.label.position=0.5
+         )
+```
+
+**Two Correlated Factors Model**
+
+```{r}
+
+# Define the two-factor model 
+model_2f <- '
+cog =~ i3 + i4 + i5 + i7 + i8 + i9 + i12 + i14 + i15 + i20
+com =~ i1 + i2 + i6 + i10 + i11 + i13 + i16 + i17 + i18 + i19
+'
+# Fit the model
+fit_model_2f <- cfa(model_2f, data = data, ordered = TRUE,
+                    estimator = "WLSMV", std.lv=TRUE)
+
+# Get fit measures 
+fitMeasures(fit_model_2f, fit.measures = c("chisq","df","cfi", "rmsea",
+                                           "rmsea.ci.lower", "rmsea.ci.upper"))
+# chisq(df=169) = 267.859, CFI = 0.972, RMSEA = 0.058 [0.052, 0.083]
+# Model was not rejected 
+
+# Get summary
+summary(fit_model_2f, fit.measures = TRUE, standardized = TRUE)
+
+# Descriptive statistics of factor loadings:
+loadings_fit_model_2f <- standardizedsolution(fit_model_2f, type = "std.all")
+# Selecting based on  row indices
+print("Cog Factor Loadings Summary:")
+print(round(loadings_fit_model_2f[1:10, ] %>% select(est.std) %>% 
+        summarise(mean = mean(abs(est.std)), sd = sd(abs(est.std)),
+                  min = min(abs(est.std)), max = max(abs(est.std))), 2))
+# Loadings for cog: Mean = 0.49, SD = 0.16, min = 0.3 and max = 0.68
+
+# Selecting based on row indices 
+print("Com Factor Loadings Summary:")
+print(round(loadings_fit_model_2f[11:20, ] %>% select(est.std) %>% 
+        summarise(mean = mean(abs(est.std)), sd = sd(abs(est.std)),
+                  min = min(abs(est.std)), max = max(abs(est.std))), 2))
+#  Loadings for com: Mean = 0.53, SD = 0.22, min = 0.01 and max = 0.76
+
+# Reliability
+print(round(reliability(fit_model_2f), 2))
+comp_reliability(fit_model_2f) 
+# Cog: alpha = 0.72, alpha ord. = 0.77, omega McDonald = 0.69, comp. reliability = 0.52
+# Com: alpha = 0.83, alpha ord. = 0.87, omega McDonald = 0.84, comp. reliability = 0.70
+
+# Plot the model
+semPaths(fit_model_2f,"std",layout="circle",residuals=FALSE,sizeLat=14,sizeLat2=14,edge.color="black",edge.label.cex=1.4,
+         mar=c(2.5, 2.5, 2.5, 2.5),esize=7,curvePivot = TRUE, intercepts=FALSE,thresholds = FALSE,
+         nCharNodes=0,sizeMan=8, edge.label.position=0.5
+         ) 
+
+
+```
+
+
+**Bifactor Model (Orthogonal Factors)** 
+
+```{r}
+# Define the bifactor model
+model_bifactor <- '
+cog =~ i3 + i4 + i5 + i7 + i8 + i9 + i12 + i14 + i15 + i20
+com =~ i1 + i2 + i6 + i10 + i11 + i13 + i16 + i17 + i18 + i19
+
+general =~ i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9 + i10 +
+    i11 + i12 + i13 + i14 + i15 + i16 + i17 + i18 + i19 + i20
+'
+
+# Fit the bifactor model with orthogonal factors
+fit_model_bifactor <- cfa(model_bifactor, data = data, ordered = TRUE, orthogonal = TRUE,
+                          estimator = "WLSMV", std.lv=TRUE)
+
+
+fitMeasures(fit_model_bifactor, fit.measures = c("chisq","df","cfi", "rmsea",
+                                                 "rmsea.ci.lower", "rmsea.ci.upper"))
+# chisq(df=150) = 188.811, CFI = 0.989, RMSEA = 0.045 [0.020, 0.064]
+# Model was not rejected
+
+# Get summary
+summary(fit_model_bifactor, fit.measures = TRUE, standardized = TRUE)
+
+# Descriptive statistics of factor loadings:
+loadings_fit_model_bifactor <- standardizedsolution(fit_model_bifactor, type = "std.all")
+
+# Selecting based on row indices 
+print(round(loadings_fit_model_bifactor[1:10, ] %>% select(est.std) %>% 
+        summarise(mean = mean(abs(est.std)), sd = sd(abs(est.std)),
+                  min = min(abs(est.std)), max = max(abs(est.std))), 2))
+# Loadings for cog: Mean = 0.27, SD = 0.2, min = 0.01 and max = 0.58
+
+# Selecting based on row indices 
+print(round(loadings_fit_model_bifactor[11:20, ] %>% select(est.std) %>%  
+        summarise(mean = mean(abs(est.std)), sd = sd(abs(est.std)),
+                  min = min(abs(est.std)), max = max(abs(est.std))), 2))
+# Loadings for com: Mean = 0.31, SD = 0.19, min = 0.01 and max = 0.67
+
+# Selecting based on row indices 
+print(round(loadings_fit_model_bifactor[21:40, ] %>% select(est.std) %>%  
+        summarise(mean = mean(abs(est.std)), sd = sd(abs(est.std)),
+                  min = min(abs(est.std)), max = max(abs(est.std))), 2))
+# Loadings for general: Mean = 0.52, SD = 0.18, min = 0.06 and max = 0.77
+
+# Reliability of the latent variables in the model
+print(round(reliability(fit_model_bifactor), 2))
+comp_reliability(fit_model_bifactor) 
+# cog: alpha = 0.72, alpha ord. = 0.77, omega McDonald = 0.15, comp. reliability = 0.42
+# com: alpha = 0.83, alpha ord. = 0.87, omega McDonald = 0.19, comp. reliability = 0.63
+# general: alpha = 0.87, alpha ord. = 0.90, omega McDonald = 0.78, comp. reliability = 0.90
+
+# Plot the model
+semPaths(fit_model_bifactor,"std",layout="tree2",residuals=FALSE,sizeLat=10,sizeLat2=10,edge.color="black",edge.label.cex=0.8,
+         mar=c(2, 2, 2, 2),esize=4,curvePivot = FALSE, intercepts=FALSE,thresholds = FALSE,
+         nCharNodes=0,sizeMan=3.5, edge.label.position=0.85, bifactor = "general") # Specify general factor for bifactor layout
+
+
+```
+
+
+**Constrained Bifactor Model (Orthogonal Factors)** 
+
+```{r}
+# Define the constrained bifactor model (fixing negative loadings to 0)
+model_bifactor <- '
+cog =~ i3 + i4 + 0*i5 + i7 + i8 + i9 + i12 + i14 + i15 + i20
+com =~ i1 + 0*i2 + i6 + i10 + i11 + i13 + i16 + i17 + i18 + i19
+
+general =~ i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9 + i10 +
+    i11 + 0*i12 + i13 + i14 + i15 + i16 + i17 + i18 + i19 + i20
+'
+
+# Fit the constrained bifactor model
+fit_model_bifactor <- cfa(model_bifactor, data = data, ordered = TRUE, orthogonal = TRUE,
+                                      estimator = "WLSMV", std.lv=TRUE)
+
+# Get fit measures 
+fitMeasures(fit_model_bifactor, fit.measures = c("chisq","df","cfi", "rmsea",                                                             "rmsea.ci.lower", "rmsea.ci.upper"))
+# chisq(df=153) = 199.014, CFI = 0.987, RMSEA = 0.045 [0.020, 0.064]
+
+
+# Get summary
+summary(fit_model_bifactor, fit.measures = TRUE, standardized = TRUE)
+
+# Descriptive statistics of factor loadings:
+loadings_fit_model_bifactor <- standardizedsolution(fit_model_bifactor, type = "std.all")
+
+print(round(loadings_fit_model_bifactor[1:9, ] %>% select(est.std) %>% 
+        summarise(mean = mean(abs(est.std)), sd = sd(abs(est.std)),
+                  min = min(abs(est.std)), max = max(abs(est.std))), 2))
+# Mean = 0.27, SD = 0.2, min = 0.01 and max = 0.58 
+
+# Selecting based on row indices 
+print(round(loadings_fit_model_bifactor[10:18, ] %>% select(est.std) %>% 
+        summarise(mean = mean(abs(est.std)), sd = sd(abs(est.std)),
+                  min = min(abs(est.std)), max = max(abs(est.std))), 2))
+# Mean = 0.31, SD = 0.19, min = 0.01 and max = 0.67 
+
+# Selecting based on row indices 
+print(round(loadings_fit_model_bifactor[19:36, ] %>% select(est.std) %>% 
+        summarise(mean = mean(abs(est.std)), sd = sd(abs(est.std)),
+                  min = min(abs(est.std)), max = max(abs(est.std))), 2))
+# Mean = 0.52, SD = 0.18, min = 0.06 and max = 0.77 
+
+# Reliability 
+print(round(reliability(fit_model_bifactor), 2))
+comp_reliability(fit_model_bifactor) 
+# cog: alpha = 0.71, alpha ord. = 0.76, omega McDonald = 0.36, comp. reliability = 0.46
+# com: alpha = 0.81, alpha ord. = 0.86, omega McDonald = 0.40, comp. reliability = 0.62
+# geral: alpha = 0.87, alpha ord. = 0.90, omega McDonald = 0.78, comp. reliability = 0.90
+
+# Plot the model
+semPaths(fit_model_bifactor,"std",layout="tree2",residuals=FALSE,sizeLat=10,sizeLat2=10,edge.color="black",edge.label.cex=0.8,
+         mar=c(2, 2, 2, 2),esize=4,curvePivot = FALSE, intercepts=FALSE,thresholds = FALSE,
+         nCharNodes=0,sizeMan=3.5, edge.label.position=0.85, bifactor = "general")
+
+
+```
+
+**Model Comparison**
+
+```{r}
+# O melhor modelo foi o bifatorial
+
+lavTestLRT(fit_model_uni, fit_model_2f, fit_model_bifactor)
+
+```
+
+```{r}
+
+sessionInfo()
+```
+
