@@ -1,20 +1,20 @@
-# Thesis Analysis: Judge Ratings and Internal Structure Validity (`thesis_analyzes.Rmd`)
+# Dissertation Analysis: Judge Ratings and Internal Structure Validity (`dissertation_analyzes.Rmd`)
 
 ## Overview
 
-This repository contains the R Markdown script (`thesis_analyzes.Rmd`) used for conducting key statistical analyses for the Assessment Scale for Group Music Therapy in Substance Use Disorders (MTDQ) thesis. The script performs two main sets of analyses:
+This repository contains the R Markdown script (`dissertation_analyzes.Rmd`) used for conducting key statistical analyses for the Assessment Scale for Group Music Therapy in Substance Use Disorders (MTDQ) dissertation. The script performs two main sets of analyses:
 
 1.  **Content Validation Analysis:** Summarizes and analyzes ratings provided by expert judges on the items of the [Brief Instrument Description, e.g., assessment scale].
 2.  **Internal Structure Validity Analysis:** Investigates the factor structure of the instrument using participant data via Confirmatory Factor Analysis (CFA).
 
 ## File Structure
 
-*   **`thesis_analyzes.Rmd`:** The main R Markdown file containing all the code and explanations for the analyses.
-*   **`comp_reliability.R` (Potentially Required):** A custom R script likely containing functions to calculate specific reliability metrics (e.g., Composite Reliability). This script needs to be present in the same directory as `thesis_analyzes.Rmd` or sourced using the correct path within the Rmd file.
+*   **`dissertation_analyzes.Rmd`:** The main R Markdown file containing all the code and explanations for the analyses.
+*   **`comp_reliability.R` (Potentially Required):** A custom R script likely containing functions to calculate specific reliability metrics (e.g., Composite Reliability). This script needs to be present in the same directory as `dissertation_analyzes.Rmd` or sourced using the correct path within the Rmd file.
 
 ## Prerequisites
 
-To run the `thesis_analyzes.Rmd` script successfully, you need the following:
+To run the `dissertation_analyzes.Rmd` script successfully, you need the following:
 
 1.  **R:** A recent version of R installed.
 2.  **RStudio (Recommended):** An IDE like RStudio makes working with R Markdown files easier.
@@ -28,7 +28,6 @@ To run the `thesis_analyzes.Rmd` script successfully, you need the following:
     install.packages("lavaan")     # For Confirmatory Factor Analysis (CFA)
     install.packages("semTools")   # For additional SEM tools (like reliability)
     install.packages("semPlot")    # For plotting SEM models
-    # install.packages("ggplot2") # Included in previous script, might be needed if plots are added/changed
     ```
 5.  **Custom Reliability Script:** The `comp_reliability.R` file (if used by the Rmd script).
 
@@ -36,7 +35,7 @@ To run the `thesis_analyzes.Rmd` script successfully, you need the following:
 
 *   This repository **does not include** the raw data files (`dados.xlsx`, judge response file) due to potential privacy concerns.
 *   You need to obtain these files separately and place them in a location accessible by the R script.
-*   **Crucially, you MUST update the file paths** inside the `thesis_analyzes.Rmd` script to point to the correct locations of your data files:
+*   **Crucially, you MUST update the file paths** inside the `dissertation_analyzes.Rmd` script to point to the correct locations of your data files:
     *   Look for lines using `read_excel("path/to/your/file.xlsx")` and modify the path accordingly.
 
 ## Usage
@@ -44,13 +43,13 @@ To run the `thesis_analyzes.Rmd` script successfully, you need the following:
 1.  **Install Prerequisites:** Ensure R and all required R packages are installed.
 2.  **Prepare Data:** Place your `dados.xlsx` file and the judge response Excel file in an accessible directory.
 3.  **Place Custom Script:** If `comp_reliability.R` is used, ensure it's in the same directory as the Rmd file or update the `source()` path within the Rmd.
-4.  **Update File Paths:** Open `thesis_analyzes.Rmd` in RStudio or a text editor and modify the file paths within the `read_excel()` functions to match the location of your data files.
-5.  **Run Analysis:** Open `thesis_analyzes.Rmd` in RStudio. You can run the analysis by:
+4.  **Update File Paths:** Open `dissertation_analyzes.Rmd` in RStudio or a text editor and modify the file paths within the `read_excel()` functions to match the location of your data files.
+5.  **Run Analysis:** Open `dissertation_analyzes.Rmd` in RStudio. You can run the analysis by:
     *   Running individual code chunks sequentially.
     *   Using the "Run" -> "Run All" command in RStudio.
     *   Knitting the document (e.g., to HTML or PDF) which will execute all code chunks.
 
-## Analysis Sections in `thesis_analyzes.Rmd`
+## Analysis Sections in `dissertation_analyzes.Rmd`
 
 The script is organized into the following main sections:
 
@@ -98,7 +97,7 @@ The script will primarily produce output within the R console or the rendered R 
 ## How to Cite
 
 ### Citing this Function/Code:
-Pedrosa, F. G. (2023). *thesis_data_analyzes*. Retrieved from https://github.com/FredPedrosa/thesis_data_analyzes
+Pedrosa, F. G. (2023). *dissertation_data_analyzes*. Retrieved from https://github.com/FredPedrosa/dissertation_data_analyzes
 
 ## Author
 
