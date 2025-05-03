@@ -1,5 +1,5 @@
 ---
-title: "Content Validation and Internal Validation for Thesis"
+title: "Content Validation and Internal Validation for Dissertation"
 author: "Frederico Pedrosa"
 date: "`r Sys.Date()`"
 output:
@@ -13,7 +13,7 @@ output:
 ---
 
 
-This document presents the analysis of judge ratings collected during the content validation phase of a thesis project, followed by an examination of its internal structure. The scale examined is called "Assessment Scale for Group Music Therapy in Substance Use Disorders (MTDQ)." 
+This document presents the analysis of judge ratings collected during the content validation phase of a dissertation project, followed by an examination of its internal structure. The scale examined is called "Assessment Scale for Group Music Therapy in Substance Use Disorders (MTDQ)." 
 
 ##**Content validity**
 
