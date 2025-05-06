@@ -97,7 +97,7 @@ The script will primarily produce output within the R console or the rendered R 
 ## How to Cite
 
 ### Citing this Function/Code:
-Pedrosa, F. G. (2023). *dissertation_data_analyzes*. Retrieved from https://github.com/FredPedrosa/dissertation_data_analyzes
+Pedrosa, F. G. (2023). Dissertation Analysis: Judge Ratings and Internal Structure Validity. Retrieved from https://github.com/FredPedrosa/dissertation_data_analyzes
 
 ## Author
 
