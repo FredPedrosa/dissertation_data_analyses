@@ -1,4 +1,6 @@
-# Dissertation Analysis: Judge Ratings and Internal Structure Validity (`dissertation_analyzes.Rmd`)
+# Dissertation Analysis: Judge Ratings and Internal Structure Validity 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) 
+
 
 ## Overview
 
